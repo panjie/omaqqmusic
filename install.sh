@@ -11,7 +11,7 @@ python3 -B "$source_dir/tests/check_install.py" "$source_dir"
 mkdir -p "$config_root/omarchy/plugins"
 staging=$(mktemp -d "$config_root/omarchy/.qqmusic-install.XXXXXX")
 trap 'rm -rf -- "$staging"' EXIT
-cp -- "$source_dir"/{manifest.json,BarWidget.qml,Service.qml,NativePanel.qml,PlainLabel.qml,README.md,LICENSE,THIRD_PARTY_NOTICES.md} "$staging/"
+cp -- "$source_dir"/{manifest.json,BarWidget.qml,Service.qml,NativePanel.qml,PlainLabel.qml,README.md,LICENSE,THIRD_PARTY_NOTICES.md,preview.png} "$staging/"
 mkdir -p "$staging/backend" "$staging/i18n" "$staging/docs"
 cp -- "$source_dir/docs/preview.png" "$staging/docs/"
 cp -- "$source_dir"/backend/*.py "$staging/backend/"

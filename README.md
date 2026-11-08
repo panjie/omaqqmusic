@@ -1,6 +1,6 @@
 # omaqqmusic — QQ 音乐 Omarchy 原生插件
 
-![新版播放器界面（示例歌曲与账号）](docs/preview.png)
+![播放器界面（示例歌曲、账号与模拟专辑封面）](preview.png)
 
 在 Omarchy 顶栏内使用手机 QQ 扫码登录、搜索歌曲、读取自己的歌单并直接播放。无需打开浏览器。QML 面板使用 Omarchy 主题，Python 本地服务请求 QQ 音乐接口，mpv 负责播放。
 
@@ -100,15 +100,38 @@ bash tests/preview.sh compact /tmp/qqmusic-compact.png
 QQ_PREVIEW_LANGUAGE=en bash tests/preview.sh empty /tmp/qqmusic-empty.png
 ```
 
-也支持 `login`、`playlists`、`error`、`light`、`cover`（本地模拟封面）、`cover-error`（封面加载失败回退）场景。登录预览只显示不可扫码的占位图。预览调色只作用于该独立进程，不修改桌面主题；受限环境下 Quickshell 的 IPC/Hyprland 连接警告不影响截图。
+也支持 `login`、`playlists`、`error`、`light`、`shuffle`、`cover`（本地模拟封面）、`cover-error`（封面加载失败回退）场景。登录预览只显示不可扫码的占位图。预览调色只作用于该独立进程，不修改桌面主题；受限环境下 Quickshell 的 IPC/Hyprland 连接警告不影响截图。
+
+仓库根目录的 `preview.png` 用于插件市场展示，`docs/preview.png` 保留为本地安装副本。两张图片均使用上述虚构数据生成，可在项目目录更新：
+
+```bash
+bash tests/preview.sh cover "$PWD/preview.png"
+cp preview.png docs/preview.png
+```
 
 ## 停用与清理
+
+仅停用（保留插件文件和登录状态）：
 
 ```bash
 omarchy plugin disable panjie.omaqqmusic
 ```
 
-卸载前可在插件中退出登录清除凭证；或者停用后手动删除上面列出的 `session.json`。插件备份不包含账号凭证。
+卸载通过 `omarchy plugin add` 安装的插件：先在插件内点击“退出登录”清除凭证，再执行以下命令并按提示确认。该命令移除插件目录并卸载运行中的插件：
+
+```bash
+omarchy plugin remove panjie.omaqqmusic
+```
+
+若已卸载但未退出登录，可单独清除残留凭证：
+
+```bash
+rm -f -- "${XDG_STATE_HOME:-$HOME/.local/state}/omarchy-qqmusic/session.json"
+```
+
+`plugin remove` 不清理独立的状态目录；不删除凭证时，重新安装会恢复登录状态。不要在服务仍运行时手动删除凭证。
+
+通过 `install.sh` 安装到默认配置目录的文件副本也可用 `plugin remove` 移除，Omarchy 会将其改名备份。若本地开发安装使用了自定义 `XDG_CONFIG_HOME`，请先执行上述停用命令，再手动移除 `${XDG_CONFIG_HOME}/omarchy/plugins/panjie.omaqqmusic`，因为当前 Omarchy CLI 的移除命令只查找 `~/.config`。不再需要的备份可从 `${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/plugin-backups/` 清理；插件备份不包含账号凭证。
 
 接口来源与许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
