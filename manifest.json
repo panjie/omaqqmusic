@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "local.qqmusic",
+  "name": "QQ Music",
+  "version": "0.2.0",
+  "description": "Native QQ Music QR login, library search and mpv playback",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "QQ Music",
+    "description": "QQ Music login and native playback",
+    "category": "Media",
+    "allowMultiple": false
+  },
+  "keepLoaded": true
+}

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.test-state/
+.env
+.env.*
+session.json
+*.log
+.agents/
+.codex/
+.aws/
