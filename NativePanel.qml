@@ -19,9 +19,34 @@ Item {
     readonly property color dim: Commons.Util.alpha(foreground, 0.60)
     readonly property color accent: Commons.Color.accent
     readonly property bool showingPlaylists: !!service && service.pageKind === "playlists"
-    readonly property var entries: !service ? [] : showingPlaylists ? service.playlists : service.songs
+    readonly property bool hasPlaylist: !!service && !showingPlaylists && (service.resultKind === "playlist" || service.resultKind === "favorites")
+    property bool searchPlaylist: false
+    readonly property bool localSearch: hasPlaylist && searchPlaylist
+    readonly property var songIndices: {
+        var songs = service ? service.songs : [];
+        var needle = localSearch ? searchInput.text.trim().toLocaleLowerCase() : "";
+        var indices = [];
+        for (var i = 0; i < songs.length; i++) {
+            var song = songs[i];
+            if (!needle || [song.title, song.artist, song.album].some(function (value) {
+                return String(value || "").toLocaleLowerCase().indexOf(needle) !== -1;
+            })) indices.push(i);
+        }
+        return indices;
+    }
+    readonly property var entries: !service ? [] : showingPlaylists ? service.playlists : songIndices.map(function (index) { return root.service.songs[index]; })
+    onHasPlaylistChanged: if (!hasPlaylist) searchPlaylist = false
+    onLocalSearchChanged: searchInput.text = ""
+    onEntriesChanged: if (libraryScroll.contentItem) libraryScroll.contentItem.contentY = 0
     property color foreground: Commons.Color.foreground
     property alias input: searchInput
+    function search() {
+        if (!localSearch && available && searchInput.text.trim())
+            service.search(searchInput.text.trim(), 1);
+    }
+    function playSong(row) {
+        action("play", {index: songIndices[row]});
+    }
     function action(command, args) {
         if (service)
             service.request(command, args);
@@ -280,24 +305,43 @@ Item {
         RowLayout {
             Layout.fillWidth: true
             spacing: Style.space(8)
+            Button {
+                visible: root.hasPlaylist
+                focusable: true
+                text: strings.t(root.localSearch ? "search_playlist" : "search_online")
+                tooltipText: strings.t(root.localSearch ? "switch_search_online" : "switch_search_playlist")
+                selected: root.localSearch
+                bordered: true
+                onClicked: root.searchPlaylist = !root.searchPlaylist
+            }
             TextField {
                 id: searchInput
                 Layout.fillWidth: true
                 maximumLength: 100
-                placeholderText: strings.t("search_hint")
+                placeholderText: strings.t(root.localSearch ? "search_playlist_hint" : "search_hint")
                 foreground: root.foreground
                 selectByMouse: true
-                onAccepted: if (root.available && text.trim())
-                    root.service.search(text.trim(), 1)
+                onAccepted: root.search()
                 Accessible.name: strings.t("search")
             }
             Button {
                 focusable: true
-                iconText: "󰍉"
-                tooltipText: strings.t("search")
-                enabled: root.available && searchInput.text.trim().length > 0
-                onClicked: root.service.search(searchInput.text.trim(), 1)
+                iconText: root.localSearch ? "󰅖" : "󰍉"
+                tooltipText: strings.t(root.localSearch ? "clear_search" : "search")
+                enabled: (root.localSearch || root.available) && searchInput.text.trim().length > 0
+                onClicked: {
+                    if (root.localSearch) searchInput.text = "";
+                    else root.search();
+                }
             }
+        }
+        PlainLabel {
+            visible: root.localSearch
+            Layout.fillWidth: true
+            text: strings.t("search_playlist_loaded")
+            color: root.dim
+            font.pixelSize: Style.font.caption
+            wrapMode: Text.Wrap
         }
         RowLayout {
             visible: !!root.state.account.loggedIn
@@ -458,7 +502,7 @@ Item {
                         anchors.horizontalCenter: parent.horizontalCenter
                         horizontalAlignment: Text.AlignHCenter
                         wrapMode: Text.Wrap
-                        text: strings.t(root.service && (root.service.resultKind || root.showingPlaylists) ? "empty_hint" : "welcome_hint")
+                        text: strings.t(root.localSearch ? "search_playlist_empty" : root.service && (root.service.resultKind || root.showingPlaylists) ? "empty_hint" : "welcome_hint")
                         color: root.dim
                         font.pixelSize: Style.font.bodySmall
                     }
@@ -510,6 +554,7 @@ Item {
     Connections {
         target: root.service
         function onSongsChanged() {
+            if (root.localSearch) searchInput.text = "";
             libraryScroll.contentItem.contentY = 0;
         }
         function onPlaylistsChanged() {
@@ -568,9 +613,7 @@ Item {
         required property var modelData
         required property int index
         function activate() {
-            root.action("play", {
-                index: songRow.index
-            });
+            root.playSong(songRow.index);
         }
         readonly property bool current: !!root.state.track && root.state.track.mid === songRow.modelData.mid
         readonly property bool sounding: songRow.current && root.state.playing && !root.state.paused
@@ -611,7 +654,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 color: root.dim
                 font.pixelSize: Style.font.caption
-                text: String(songRow.index + 1)
+                text: String(root.songIndices[songRow.index] + 1)
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter

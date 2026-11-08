@@ -67,5 +67,13 @@
   "mode_shuffle": "随机播放",
   "mode_sequential": "顺序播放",
   "switch_shuffle": "切换为随机播放",
-  "switch_sequential": "切换为顺序播放"
+  "switch_sequential": "切换为顺序播放",
+  "search_playlist": "当前歌单",
+  "search_online": "在线搜索",
+  "switch_search_online": "切换到 QQ 音乐在线搜索",
+  "switch_search_playlist": "切换到当前歌单搜索",
+  "search_playlist_hint": "搜索歌曲、歌手或专辑",
+  "clear_search": "清除搜索",
+  "search_playlist_loaded": "仅搜索当前已加载的歌曲（最多 200 首）",
+  "search_playlist_empty": "当前歌单中没有匹配歌曲，试试其他关键词或清除搜索。"
 }

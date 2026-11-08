@@ -68,5 +68,13 @@
   "mode_shuffle": "Shuffle",
   "mode_sequential": "Sequential",
   "switch_shuffle": "Switch to shuffle",
-  "switch_sequential": "Switch to sequential playback"
+  "switch_sequential": "Switch to sequential playback",
+  "search_playlist": "Playlist",
+  "search_online": "Online",
+  "switch_search_online": "Switch to QQ Music online search",
+  "switch_search_playlist": "Search the current playlist",
+  "search_playlist_hint": "Song, artist or album",
+  "clear_search": "Clear search",
+  "search_playlist_loaded": "Searches loaded songs only (up to 200)",
+  "search_playlist_empty": "No matching songs in this playlist. Try another keyword or clear the search."
 }
