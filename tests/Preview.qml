@@ -82,6 +82,7 @@ ShellRoot {
                         cover: scenario === "cover" ? Qt.resolvedUrl("cover.svg") : scenario === "cover-error" ? Qt.resolvedUrl("missing-cover.png") : ""
                     },
                     playing: true,
+                    playbackMode: scenario === "shuffle" ? "shuffle" : "sequential",
                     paused: false,
                     position: 83,
                     duration: 246,
@@ -90,6 +91,9 @@ ShellRoot {
                     canNext: true
                 })
             function request(command, args) {
+                if (command === "playback_mode") {
+                    state = Object.assign({}, state, {playbackMode: args.mode});
+                }
                 console.log("ACTION", command, JSON.stringify(args));
             }
             function search(text, page) {

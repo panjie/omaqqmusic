@@ -64,5 +64,9 @@
   "item_count": {
     "one": "%1 item",
     "other": "%1 items"
-  }
+  },
+  "mode_shuffle": "Shuffle",
+  "mode_sequential": "Sequential",
+  "switch_shuffle": "Switch to shuffle",
+  "switch_sequential": "Switch to sequential playback"
 }

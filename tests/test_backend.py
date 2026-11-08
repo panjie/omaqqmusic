@@ -365,6 +365,64 @@ class PlaybackTests(unittest.TestCase):
         self.assertEqual(self.app.index, 0)
         self.assertEqual(self.out[-1], {'id': 7, 'ok': False, 'error': 'unavailable'})
 
+    def test_shuffle_visits_each_song_once_and_previous_retraces_order(self):
+        self.app.results = [{'mid': str(i)} for i in range(5)]
+        self.app.dispatch('play', {'index': 2})
+        calls = list(self.player.calls)
+        with patch('main.random.shuffle', side_effect=lambda values: values.reverse()):
+            self.app.dispatch('playback_mode', {'mode': 'shuffle'})
+        self.assertEqual(self.player.calls, calls)  # Switching does not restart playback.
+        self.assertEqual(self.app.status()['playbackMode'], 'shuffle')
+        self.assertFalse(self.app.status()['canPrevious'])
+        self.app.dispatch('next', {})
+        self.assertEqual(self.app.index, 4)
+        self.app.dispatch('previous', {})
+        self.assertEqual(self.app.index, 2)
+        self.app.results = [{'mid': 'new-search'}]
+        visited = [self.app.index]
+        while self.app.status()['canNext']:
+            self.app.on_player({'event': 'end-file', 'reason': 'eof'})
+            visited.append(self.app.index)
+        self.assertEqual(visited, [2, 4, 3, 1, 0])
+        count = len(self.player.calls)
+        self.app.on_player({'event': 'end-file', 'reason': 'eof'})
+        self.assertEqual(len(self.player.calls), count)
+        self.assertFalse(self.app.status()['playing'])
+
+    def test_switch_to_sequential_restores_list_order(self):
+        self.app.results = [{'mid': str(i)} for i in range(4)]
+        self.app.dispatch('playback_mode', {'mode': 'shuffle'})
+        self.app.dispatch('play', {'index': 1})
+        self.app.dispatch('playback_mode', {'mode': 'sequential'})
+        self.assertEqual(self.app.index, 1)
+        self.assertTrue(self.app.status()['canPrevious'])
+        self.app.dispatch('next', {})
+        self.assertEqual(self.app.index, 2)
+        self.app.dispatch('previous', {})
+        self.assertEqual(self.app.index, 1)
+
+    def test_shuffle_failure_keeps_next_song_and_new_queue_resets_order(self):
+        self.app.dispatch('playback_mode', {'mode': 'shuffle'})
+        self.app.dispatch('play', {'index': 0})
+        order = list(self.app.order)
+        with patch.object(self.api, 'play_url', side_effect=UserError('unavailable')):
+            with self.assertRaises(UserError):
+                self.app.dispatch('next', {})
+        self.assertEqual(self.app.index, 0)
+        self.assertEqual(self.app.order, order)
+        self.app.dispatch('next', {})
+        self.assertEqual(self.app.index, 1)
+        self.app.results = [{'mid': 'single'}]
+        self.app.dispatch('play', {'index': 0})
+        self.assertFalse(self.app.status()['canNext'])
+        self.assertFalse(self.app.status()['canPrevious'])
+        with self.assertRaises(UserError):
+            self.app.dispatch('playback_mode', {'mode': 'invalid'})
+        self.assertEqual(self.app.status()['playbackMode'], 'shuffle')
+        self.app.dispatch('logout', {})
+        self.assertEqual(self.app.order, [])
+        self.assertFalse(self.app.status()['canNext'])
+
     def test_favorites_dispatch_populates_results(self):
         self.api.favorites = lambda: {'songs': [{'mid': 'fav'}], 'page': 1, 'more': False}
         self.app.dispatch('favorites', {})

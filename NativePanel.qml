@@ -15,6 +15,7 @@ Item {
     readonly property bool available: !!service && service.ready && !service.busy
     readonly property bool signedIn: !!state.account.loggedIn
     readonly property bool sounding: !!state.playing && !state.paused
+    readonly property bool shuffled: state.playbackMode === "shuffle"
     readonly property color dim: Commons.Util.alpha(foreground, 0.60)
     readonly property color accent: Commons.Color.accent
     readonly property bool showingPlaylists: !!service && service.pageKind === "playlists"
@@ -191,6 +192,19 @@ Item {
                         text: root.timeLabel(seekSlider.dragging ? seekSlider.liveValue : root.state.position)
                         color: root.dim
                         font.pixelSize: Style.font.caption
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                    Button {
+                        focusable: true
+                        iconText: root.shuffled ? "󰒟" : "󰒞"
+                        text: strings.t(root.shuffled ? "mode_shuffle" : "mode_sequential")
+                        tooltipText: strings.t(root.shuffled ? "switch_sequential" : "switch_shuffle")
+                        enabled: root.available
+                        onClicked: root.action("playback_mode", {
+                            mode: root.shuffled ? "sequential" : "shuffle"
+                        })
                     }
                     Item {
                         Layout.fillWidth: true

@@ -5,6 +5,7 @@ import json
 import math
 import os
 import queue
+import random
 import signal
 import sys
 import threading
@@ -22,6 +23,8 @@ class App:
         self.results = []
         self.queue = []
         self.index = -1
+        self.playback_mode = 'sequential'
+        self.order = []
         self.playing = False
         self.paused = False
         self.position = 0
@@ -43,13 +46,35 @@ class App:
         return {'account': self.api.account(), 'track': self.queue[self.index] if 0 <= self.index < len(self.queue) else None,
                 'playing': self.playing, 'paused': self.paused, 'position': self.position,
                 'duration': self.duration, 'volume': self.volume,
-                'canPrevious': self.index > 0, 'canNext': 0 <= self.index < len(self.queue) - 1}
+                'playbackMode': self.playback_mode,
+                'canPrevious': self.adjacent_index(-1) is not None,
+                'canNext': self.adjacent_index(1) is not None}
+
+    def reset_order(self):
+        self.order = list(range(len(self.queue)))
+        if self.playback_mode == 'shuffle' and self.index >= 0:
+            self.order.remove(self.index)
+            random.shuffle(self.order)
+            self.order.insert(0, self.index)
+
+    def adjacent_index(self, step):
+        if self.index not in self.order:
+            return None
+        position = self.order.index(self.index) + step
+        return self.order[position] if 0 <= position < len(self.order) else None
+
+    def advance(self, step):
+        index = self.adjacent_index(step)
+        if index is None:
+            raise UserError('invalid_request')
+        return self.play_index(index)
 
     def emit_status(self):
         self.output({'event': 'state', 'data': self.status()})
         self.last_status = time.monotonic()
 
     def play_index(self, index, tracks=None):
+        new_queue = tracks is not None
         tracks = tracks if tracks is not None else self.queue
         if not 0 <= index < len(tracks):
             raise UserError('invalid_request')
@@ -57,6 +82,8 @@ class App:
         # Commit the new queue only after resolving the URL and starting mpv.
         self.player.play(url)
         self.queue, self.index = list(tracks), index
+        if new_queue:
+            self.reset_order()
         self.playing, self.paused = False, False
         self.position, self.duration = 0, 0
         self.emit_status()
@@ -65,6 +92,15 @@ class App:
     def dispatch(self, command, args):
         if command == 'status':
             return self.status()
+        if command == 'playback_mode':
+            mode = args.get('mode')
+            if mode not in ('sequential', 'shuffle'):
+                raise UserError('invalid_request')
+            if mode != self.playback_mode:
+                self.playback_mode = mode
+                self.reset_order()
+            self.emit_status()
+            return {}
         if command == 'login':
             return self.api.start_login()
         if command == 'login_poll':
@@ -77,6 +113,7 @@ class App:
         if command == 'logout':
             self.player.close()
             self.queue, self.results, self.index = [], [], -1
+            self.order = []
             self.playing, self.paused, self.position, self.duration = False, False, 0, 0
             self.api.logout()
             self.emit_status()
@@ -92,7 +129,7 @@ class App:
         if command == 'play':
             return self.play_index(int(args.get('index', -1)), self.results)
         if command in ('previous', 'next'):
-            return self.play_index(self.index + (1 if command == 'next' else -1))
+            return self.advance(1 if command == 'next' else -1)
         if command == 'toggle':
             if self.index < 0:
                 raise UserError('invalid_request')
@@ -156,9 +193,9 @@ class App:
         elif kind == 'end-file':
             self.playing = False
             self.emit_status()
-            if event.get('reason') == 'eof' and self.index + 1 < len(self.queue):
+            if event.get('reason') == 'eof' and self.adjacent_index(1) is not None:
                 try:
-                    self.play_index(self.index + 1)
+                    self.advance(1)
                 except UserError as exc:
                     self.output({'event': 'error', 'error': str(exc)})
                 except Exception:

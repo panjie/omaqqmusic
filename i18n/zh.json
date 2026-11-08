@@ -63,5 +63,9 @@
   "page_label": "第 %1 页",
   "item_count": {
     "other": "%1 项"
-  }
+  },
+  "mode_shuffle": "随机播放",
+  "mode_sequential": "顺序播放",
+  "switch_shuffle": "切换为随机播放",
+  "switch_sequential": "切换为顺序播放"
 }
