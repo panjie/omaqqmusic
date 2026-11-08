@@ -2,7 +2,7 @@
 set -euo pipefail
 source_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
-target="$config_root/omarchy/plugins/local.qqmusic"
+target="$config_root/omarchy/plugins/panjie.omaqqmusic"
 for dependency in python3 mpv omarchy omarchy-shell; do
   command -v "$dependency" >/dev/null || { printf 'Missing dependency: %s\n' "$dependency" >&2; exit 1; }
 done
@@ -19,14 +19,14 @@ cp -- "$source_dir"/i18n/*.json "$staging/i18n/"
 omarchy plugin validate "$staging"
 if [[ -e "$target" || -L "$target" ]]; then
   mkdir -p "$config_root/omarchy/plugin-backups"
-  backup="$config_root/omarchy/plugin-backups/local.qqmusic.$(date +%Y%m%d-%H%M%S).$$"
+  backup="$config_root/omarchy/plugin-backups/panjie.omaqqmusic.$(date +%Y%m%d-%H%M%S).$$"
   # keepLoaded services survive hot reload; explicitly stop the old backend.
   omarchy-shell shell rescanPlugins
-  omarchy plugin disable local.qqmusic
+  omarchy plugin disable panjie.omaqqmusic
   mv -- "$target" "$backup"
   printf 'Previous plugin backed up to: %s\n' "$backup"
 fi
 mv -- "$staging" "$target"
 omarchy-shell shell rescanPlugins
-omarchy plugin enable local.qqmusic --section right
+omarchy plugin enable panjie.omaqqmusic --section right
 printf 'Installed. Click QQ Music in the bar, then QQ QR sign-in.\n'

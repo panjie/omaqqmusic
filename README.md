@@ -21,22 +21,40 @@
 omarchy pkg add python mpv
 
 # 首次安装
-git clone https://github.com/panjie/omaqqmusic.git
-cd omaqqmusic
-bash install.sh
+omarchy plugin add https://github.com/panjie/omaqqmusic.git --enable
 
-# 后续升级：在项目目录执行
-git pull --ff-only
-bash install.sh
+# 后续升级
+omarchy plugin update panjie.omaqqmusic
 ```
 
-脚本先验证文件，再安装到 `${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/plugins/local.qqmusic`，启用到顶栏右侧。已有版本自动备份到 `~/.config/omarchy/plugin-backups/`（遵循 `XDG_CONFIG_HOME`）。若启用失败，文件仍保留，可执行：
+Omarchy 会克隆仓库、验证根目录的 `manifest.json` 并启用插件，无需手动执行 `install.sh`。插件 ID 为 `panjie.omaqqmusic`，默认放在顶栏右侧；交互安装时也可以选择其他位置。当前 Omarchy CLI 安装到 `~/.config/omarchy/plugins/panjie.omaqqmusic`，保留 Git 信息供后续更新。`plugin add` 不会自动安装 Python 或 mpv，请先确保上述依赖已安装。
+
+若安装成功但启用失败，可执行：
 
 ```bash
-omarchy plugin enable local.qqmusic --section right
+omarchy plugin enable panjie.omaqqmusic --section right
 ```
 
 如果升级后仍显示旧界面，请在桌面终端运行 `omarchy restart shell`，再重新打开插件。此操作会重启顶栏并中断当前播放。
+
+### 从旧版 local.qqmusic 迁移
+
+插件 ID 已从 `local.qqmusic` 改为 `panjie.omaqqmusic`。若安装过旧 ID 的版本（包括通过 `plugin add` 安装），请先停用并将旧目录移到插件发现目录之外，再使用新命令安装，避免两个版本同时运行。旧脚本安装的文件副本不包含 Git 信息，不能直接执行 `plugin update`：
+
+```bash
+omarchy plugin disable local.qqmusic
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+mkdir -p "$config_root/omarchy/plugin-backups"
+mv -- "$config_root/omarchy/plugins/local.qqmusic" \
+  "$config_root/omarchy/plugin-backups/local.qqmusic.$(date +%Y%m%d-%H%M%S).$$"
+omarchy plugin add https://github.com/panjie/omaqqmusic.git --enable
+```
+
+登录凭证位于独立的状态目录，迁移保留登录状态。若设置了自定义 `XDG_CONFIG_HOME`，请注意旧脚本遵循该变量，而当前 Omarchy CLI 使用上述 `~/.config` 路径。
+
+### 本地开发安装
+
+仍可在源码目录运行 `bash install.sh`，验证后复制文件并启用到顶栏右侧；已有版本会备份到 `${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/plugin-backups/`。此方式不保留 Git 信息，后续更新需在源码目录执行 `git pull --ff-only` 和 `bash install.sh`。请勿用它覆盖通过 `plugin add` 安装、需要由 `plugin update` 管理的目录。
 
 ## 使用
 
@@ -87,7 +105,7 @@ QQ_PREVIEW_LANGUAGE=en bash tests/preview.sh empty /tmp/qqmusic-empty.png
 ## 停用与清理
 
 ```bash
-omarchy plugin disable local.qqmusic
+omarchy plugin disable panjie.omaqqmusic
 ```
 
 卸载前可在插件中退出登录清除凭证；或者停用后手动删除上面列出的 `session.json`。插件备份不包含账号凭证。

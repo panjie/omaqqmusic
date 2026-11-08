@@ -35,13 +35,13 @@ esac
                                         env=env, capture_output=True, text=True, timeout=10)
                 self.assertEqual(result.returncode, 0, result.stderr)
             config = Path(env['XDG_CONFIG_HOME'])
-            target = config / 'omarchy/plugins/local.qqmusic'
+            target = config / 'omarchy/plugins/panjie.omaqqmusic'
             for name in ('Service.qml', 'NativePanel.qml', 'backend/main.py', 'backend/player.py', 'i18n/zh.json'):
                 self.assertTrue((target / name).is_file(), name)
             self.assertEqual(len(list((config / 'omarchy/plugins').iterdir())), 1)
             self.assertEqual(len(list((config / 'omarchy/plugin-backups').iterdir())), 1)
             self.assertEqual((config / 'enable.log').read_text().splitlines(),
-                             ['plugin enable local.qqmusic --section right'] * 2)
+                             ['plugin enable panjie.omaqqmusic --section right'] * 2)
 
 
 if __name__ == '__main__':

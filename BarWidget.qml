@@ -6,7 +6,7 @@ import qs.Commons as Commons
 
 BarWidget {
     id: root
-    moduleName: "local.qqmusic"
+    moduleName: "panjie.omaqqmusic"
     property bool popupOpen: false
     readonly property var service: bar && bar.shell ? bar.shell.serviceFor(moduleName) : null
     readonly property var state: service ? service.state : ({

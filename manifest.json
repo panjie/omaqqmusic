@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "local.qqmusic",
+  "id": "panjie.omaqqmusic",
   "name": "QQ Music",
   "version": "0.2.0",
   "description": "Native QQ Music QR login, library search and mpv playback",
@@ -16,6 +16,7 @@
     "displayName": "QQ Music",
     "description": "QQ Music login and native playback",
     "category": "Media",
+    "defaultSection": "right",
     "allowMultiple": false
   },
   "keepLoaded": true
