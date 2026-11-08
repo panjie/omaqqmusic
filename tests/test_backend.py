@@ -172,6 +172,25 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(api.transport.calls[0][1]['params']['p'], 2)
         self.assertEqual(len(song_list([{'mid': 'a', 'title': 'x'*1000}])[0]['title']), 512)
 
+    def test_album_cover_supports_search_and_playlist_metadata(self):
+        for metadata in ({'album': {'mid': 'Album123', 'name': 'Album'}},
+                         {'albummid': 'Album123', 'albumname': 'Album'},
+                         {'songInfo': {'mid': 'song', 'album': {'mid': 'Album123', 'name': 'Album'}}}):
+            with self.subTest(metadata=metadata):
+                song = song_list([{'mid': 'song', **metadata}])[0]
+                self.assertEqual(song['album'], 'Album')
+                self.assertEqual(song['cover'],
+                                 'https://y.gtimg.cn/music/photo_new/T002R300x300M000Album123.jpg')
+
+    def test_invalid_album_cover_keeps_song_without_remote_image(self):
+        for mid in ('', '../private', 'https://evil.test/image', '<img>', 'a' * 65):
+            with self.subTest(mid=mid):
+                song = song_list([{'mid': 'song', 'album': {'mid': mid}}])[0]
+                self.assertEqual(song['mid'], 'song')
+                self.assertEqual(song['cover'], '')
+        for album in (None, 'invalid', []):
+            self.assertEqual(song_list([{'mid': 'song', 'album': album}])[0]['cover'], '')
+
     def test_play_url_respects_server_entitlement_and_uses_media_mid(self):
         api = self.api([reply({'code': 0, 'req_0': {'data': {'sip': ['http://dl.stream.qqmusic.qq.com/'],
                        'midurlinfo': [{'songmid': 'abc', 'purl': 'M500abcfile.mp3?vkey=x'}]}}})])

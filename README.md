@@ -8,7 +8,7 @@
 
 固定播放卡片 + 独立滚动曲库：浏览歌曲时仍能控制播放、进度与音量。唱片图形、当前曲目高亮、收藏/歌单选中态、账号入口、搜索和分页按视觉层级排列。颜色、字体、圆角与动画设置跟随 Omarchy；中文与英文文案随桌面语言切换。
 
-参考 Omarchy 原生媒体与音量面板的控件规范，并借鉴 [Omaspotify](https://github.com/nixfred/omaspotify) 的迷你播放器与曲库分区思路。唱片是本地 QML 图形，不额外请求专辑图片。
+参考 Omarchy 原生媒体与音量面板的控件规范，并借鉴 [Omaspotify](https://github.com/nixfred/omaspotify) 的迷你播放器与曲库分区思路。播放卡片显示当前歌曲的专辑封面，暂停时保留；封面缺失、加载中或加载失败时显示本地唱片图形。仅加载当前曲目的封面，不预加载搜索结果或歌单中的图片。
 
 键盘支持 Tab / Shift+Tab 切换控件、Enter / Space 激活按钮或歌曲，搜索框回车搜索。歌曲获得键盘焦点时自动滚动到可见位置。进度拖动显示正在选择的时间。
 
@@ -70,7 +70,7 @@ omarchy plugin add https://github.com/panjie/omaqqmusic.git --enable
 
 ## 登录状态与网络
 
-登录二维码只在点击登录时请求；随后每 2.5 秒检查状态，最长 2 分钟，可点击取消。搜索、歌单、选歌和队列自动切歌会请求腾讯接口，音频播放访问腾讯 CDN。没有网页取 Cookie、外部扫码代理或后台推荐轮询。
+登录二维码只在点击登录时请求；随后每 2.5 秒检查状态，最长 2 分钟，可点击取消。搜索、歌单、选歌和队列自动切歌会请求腾讯接口，音频播放访问腾讯 CDN，播放卡片的专辑封面通过 HTTPS 从 `y.gtimg.cn` 加载，不附带音乐登录凭证。没有网页取 Cookie、外部扫码代理或后台推荐轮询。
 
 音乐登录凭证保存在 `${XDG_STATE_HOME:-$HOME/.local/state}/omarchy-qqmusic/session.json`，目录权限 `0700`，文件权限 `0600`。文件是本机明文凭证，不应分享；凭证不进入 QML、命令行参数或日志。点击退出登录会删除该文件并停止播放。登录状态过期时需重新扫码。
 
@@ -100,7 +100,7 @@ bash tests/preview.sh compact /tmp/qqmusic-compact.png
 QQ_PREVIEW_LANGUAGE=en bash tests/preview.sh empty /tmp/qqmusic-empty.png
 ```
 
-也支持 `login`、`playlists`、`error`、`light` 场景。登录预览只显示不可扫码的占位图。预览调色只作用于该独立进程，不修改桌面主题；受限环境下 Quickshell 的 IPC/Hyprland 连接警告不影响截图。
+也支持 `login`、`playlists`、`error`、`light`、`cover`（本地模拟封面）、`cover-error`（封面加载失败回退）场景。登录预览只显示不可扫码的占位图。预览调色只作用于该独立进程，不修改桌面主题；受限环境下 Quickshell 的 IPC/Hyprland 连接警告不影响截图。
 
 ## 停用与清理
 

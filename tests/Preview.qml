@@ -78,7 +78,8 @@ ShellRoot {
                     track: {
                         mid: "1",
                         title: "夜空里的微光",
-                        artist: "晚风乐队 · 深夜电台"
+                        artist: "晚风乐队 · 深夜电台",
+                        cover: scenario === "cover" ? Qt.resolvedUrl("cover.svg") : scenario === "cover-error" ? Qt.resolvedUrl("missing-cover.png") : ""
                     },
                     playing: true,
                     paused: false,

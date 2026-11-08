@@ -127,6 +127,16 @@ Item {
                                 font.pixelSize: Style.font.icon
                             }
                         }
+                        Image {
+                            id: albumCover
+                            anchors.fill: parent
+                            source: root.state.track ? (root.state.track.cover || "") : ""
+                            asynchronous: true
+                            sourceSize.width: 300
+                            sourceSize.height: 300
+                            fillMode: Image.PreserveAspectCrop
+                            visible: status === Image.Ready
+                        }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true

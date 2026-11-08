@@ -206,10 +206,19 @@ def song_list(items):
         except UserError:
             continue
         singers = raw.get('singer') or []
+        album = raw.get('album')
+        album = album if isinstance(album, dict) else {}
+        cover = ''
+        try:
+            album_mid = identifier(album.get('mid') or raw.get('albummid') or '')
+            cover = f'https://y.gtimg.cn/music/photo_new/T002R300x300M000{album_mid}.jpg'
+        except UserError:
+            pass  # Missing/malformed artwork must not discard a playable song.
         result.append({'mid': mid, 'media': media,
                        'title': bounded(raw.get('title') or raw.get('name') or raw.get('songname')),
                        'artist': bounded(' / '.join(bounded(s.get('name'), 100) for s in singers[:10] if isinstance(s, dict))),
-                       'album': bounded((raw.get('album') or {}).get('name') or raw.get('albumname'))})
+                       'album': bounded(album.get('name') or raw.get('albumname')),
+                       'cover': cover})
     return result
 
 

@@ -13,6 +13,8 @@ cp "$project_dir/tests/Preview.qml" "$preview_dir/shell.qml"
 printf '%s' "${QQ_PREVIEW_LANGUAGE:-zh}" > "$preview_dir/language"
 # Deliberately not a scannable code: the preview never requests login credentials.
 printf '%s' '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="180" height="180" fill="white"/><path d="M20 20h45v45H20zM115 20h45v45h-45zM20 115h45v45H20zM85 85h30v30H85zM130 130h30v30h-30z" fill="black"/></svg>' > "$preview_dir/qr.svg"
+# Synthetic album artwork exercises Image loading without network requests.
+printf '%s' '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><rect width="300" height="300" fill="#253e54"/><circle cx="210" cy="80" r="36" fill="#e4c98f"/><path d="M0 220L100 110L220 300H0Z" fill="#527b7a"/><path d="M80 300L230 150L300 240V300Z" fill="#8fb2a0"/></svg>' > "$preview_dir/cover.svg"
 export QQ_PREVIEW_SCENARIO="${1:-playing}"
 export QQ_PREVIEW_OUTPUT="${2:-/tmp/qqmusic-preview.png}"
 QT_QPA_PLATFORM=offscreen QT_QPA_PLATFORMTHEME=basic QT_QUICK_BACKEND=software \
