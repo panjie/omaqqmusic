@@ -36,7 +36,8 @@ esac
                 self.assertEqual(result.returncode, 0, result.stderr)
             config = Path(env['XDG_CONFIG_HOME'])
             target = config / 'omarchy/plugins/panjie.omaqqmusic'
-            for name in ('Service.qml', 'NativePanel.qml', 'backend/main.py', 'backend/player.py', 'i18n/zh.json'):
+            for name in ('Service.qml', 'NativePanel.qml', 'backend/main.py', 'backend/player.py',
+                         'i18n/zh.json', 'i18n/zh-CN.json'):
                 self.assertTrue((target / name).is_file(), name)
             self.assertEqual(len(list((config / 'omarchy/plugins').iterdir())), 1)
             self.assertEqual(len(list((config / 'omarchy/plugin-backups').iterdir())), 1)

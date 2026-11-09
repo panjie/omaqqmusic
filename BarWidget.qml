@@ -23,11 +23,15 @@ BarWidget {
         if (service)
             service.request(command, args);
     }
+    Translations {
+        id: strings
+        directory: Qt.resolvedUrl("i18n")
+    }
     activeFocusOnTab: true
     Keys.onReturnPressed: popupOpen = !popupOpen
     Keys.onSpacePressed: action("toggle")
     Accessible.role: Accessible.Button
-    Accessible.name: "QQ Music"
+    Accessible.name: strings.t("idle")
     Rectangle {
         anchors.fill: parent
         anchors.margins: Style.space(3)
@@ -43,7 +47,7 @@ BarWidget {
         id: label
         anchors.centerIn: parent
         width: Math.min(implicitWidth, parent.width - Style.space(12))
-        text: root.vertical ? "󰎈" : (root.state.playing && !root.state.paused ? "󰐊  " : "󰎈  ") + (root.state.track ? root.state.track.title : "QQ 音乐")
+        text: root.vertical ? "󰎈" : (root.state.playing && !root.state.paused ? "󰐊  " : "󰎈  ") + (root.state.track ? root.state.track.title : strings.t("idle"))
         color: root.bar ? root.bar.barForeground : root.foreground
     }
     MouseArea {

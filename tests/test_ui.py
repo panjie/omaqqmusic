@@ -24,8 +24,11 @@ class UiContractTests(unittest.TestCase):
 
     def test_all_error_and_login_states_are_translated(self):
         en = json.loads((ROOT / 'i18n/en.json').read_text())
-        zh = json.loads((ROOT / 'i18n/zh.json').read_text())
-        self.assertEqual(set(en), set(zh))
+        chinese = [json.loads((ROOT / 'i18n' / f'{locale}.json').read_text())
+                   for locale in ('zh', 'zh-CN')]
+        for catalog in chinese:
+            self.assertEqual(set(en), set(catalog))
+        self.assertTrue(all(catalog == chinese[0] for catalog in chinese[1:]))
         for file in (ROOT / 'backend').glob('*.py'):
             for key in re.findall(r"UserError\('([a-z_]+)'\)", file.read_text()):
                 self.assertIn('error_' + key, en)

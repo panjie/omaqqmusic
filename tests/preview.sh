@@ -10,7 +10,7 @@ ln -s /usr/share/omarchy/shell/Commons "$preview_dir/Commons"
 ln -s /usr/share/omarchy/shell/Ui "$preview_dir/Ui"
 ln -s "$project_dir" "$preview_dir/Music"
 cp "$project_dir/tests/Preview.qml" "$preview_dir/shell.qml"
-printf '%s' "${QQ_PREVIEW_LANGUAGE:-zh}" > "$preview_dir/language"
+printf '%s' "${QQ_PREVIEW_LANGUAGE:-zh-CN}" > "$preview_dir/language"
 # Deliberately not a scannable code: the preview never requests login credentials.
 printf '%s' '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="180" height="180" fill="white"/><path d="M20 20h45v45H20zM115 20h45v45h-45zM20 115h45v45H20zM85 85h30v30H85zM130 130h30v30h-30z" fill="black"/></svg>' > "$preview_dir/qr.svg"
 # Synthetic album artwork exercises Image loading without network requests.
