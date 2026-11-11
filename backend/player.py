@@ -23,6 +23,7 @@ class Player:
                 'mpv', '--no-config', '--no-video', '--idle=yes', '--no-terminal',
                 '--input-default-bindings=no', '--input-terminal=no', '--load-scripts=no',
                 '--ytdl=no', '--audio-display=no', '--network-timeout=12',
+                '--tls-verify=yes',  # mpv 0.41 defaults to no, even for HTTPS.
                 '--demuxer-max-bytes=16MiB', '--demuxer-lavf-propagate-opts=no',
                 '--volume=70', '--referrer=https://y.qq.com/',
                 f'--input-ipc-client=fd://{child.fileno()}',
